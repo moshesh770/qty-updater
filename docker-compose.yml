@@ -1,0 +1,38 @@
+version: '3.9'
+services:
+  elasticsearch:
+      image: docker.elastic.co/elasticsearch/elasticsearch:8.5.3
+      container_name: es01.me
+      environment:
+        - discovery.type=single-node
+        - ES_JAVA_OPTS=-Xms1g -Xmx1g
+        - xpack.security.enabled=false
+      volumes:
+        - es_data:/usr/share/elasticsearch/data
+      ports:
+        - target: 9200
+          published: 9200
+        - target: 9300
+          published: 9300
+      networks:
+        - elastic
+      healthcheck:
+        test: curl -u elastic:elastic -s -f elasticsearch:9200/_cat/health >/dev/null || exit 1
+        interval: 10s
+        retries: 10
+  faststore:
+      image: codvl/fastapi:latest
+      container_name: fastapi
+      environment:
+        - ELASTIC_PASSWORD=OVr7_2xU5Jyuz0Z0EvWy
+      ports:
+        - target: 8000
+          published: 8000
+      networks:
+        - elastic
+networks:
+  elastic:
+    name: elastic
+    driver: bridge
+volumes:
+  es_data:
