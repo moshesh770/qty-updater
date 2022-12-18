@@ -59,6 +59,15 @@ def remove_store(product_id: str):
     return res
 
 
+@app.get("/products/stores/{search_term}")
+def get_products_store(search_term: str):
+    st, res = ProductInd.fetch_store_by_product(search_term=search_term)
+    if st != 200:
+        raise HTTPException(st, res)
+    else:
+        return res
+
+
 @app.delete("/products/{product_id}")
 def remove_product(product_id: str):
     st, res = ProductInd.remove_by_id("products", product_id)
@@ -79,7 +88,11 @@ def update_qty(product_id: str, qty: int):
 
 @app.get("/stores/{store_id}/products/")
 def get_store_items(store_id: str):
-    return ProductInd.fetch_store_products(store_id=store_id)
+    st, res = ProductInd.fetch_store_products(store_id=store_id)
+    if st != 200:
+        raise HTTPException(st, res)
+    else:
+        return res
 
 
 @app.post("/products/")
@@ -95,5 +108,5 @@ def create_store(store: Store):
     return StoreInd.put_single('stores', store)
 
 
-# if __name__ == '__main__':
-#     uvicorn.run("main:app", reload=True)
+if __name__ == '__main__':
+    uvicorn.run("main:app", reload=True)

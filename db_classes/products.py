@@ -21,6 +21,41 @@ class Product(IndObject):
             return 404, f"No products for store {store_id} were found"
 
     @classmethod
+    def fetch_store_by_product(cls, search_term: str):
+        query_body = {
+            "query": {
+                "multi_match": {
+                    "fields": [
+                        "name",
+                        "description"
+                    ],
+                    "query": f"{search_term}"
+                }
+            }
+        }
+        stores = {}
+        try:
+            res = es.search(index="products", body=query_body, size=100)
+            if res.body:
+                if res.body['hits']['hits']:
+                    for p in res.body['hits']['hits']:
+                        stores_id = p['_source']['store_id']
+                        if stores_id not in stores:
+                            try:
+                                st = Store.load_by_id('stores', stores_id)
+                                if st[0] == 200:
+                                    stores[stores_id] = st[1]['_source']
+                            except:
+                                pass
+                else:
+                    return 404, f"No products with {search_term} in name were found"
+            else:
+                return 500, res
+            return 200, stores
+        except NotFoundError:
+            return 404, f"No products with {search_term} in name were found"
+
+    @classmethod
     def update_inventory(cls, prod_id: str, new_qty: int):
         if not cls.is_object_exists("products", prod_id):
             return 404, f"No product with {prod_id} was found"
