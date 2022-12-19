@@ -10,6 +10,7 @@ app = FastAPI()
 
 class Product(BaseModel):
     name: str
+    sku: str
     description: Optional[str] = None
     category: Optional[str] = None
     inventory: int

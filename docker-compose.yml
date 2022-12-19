@@ -25,11 +25,37 @@ services:
       container_name: fastapi
       environment:
         - ELASTIC_PASSWORD=OVr7_2xU5Jyuz0Z0EvWy
+      build:
+        context: .
+        dockerfile: CI/Dockerfile
       ports:
         - target: 8000
           published: 8000
       networks:
         - elastic
+  zookeeper:
+      image: wurstmeister/zookeeper
+      hostname: zookeeper
+      container_name: zookeeper
+      ports:
+        - "2181:2181"
+      environment:
+        ZOOKEEPER_CLIENT_PORT: 2181
+      networks:
+        - elastic
+  kafka:
+      image: wurstmeister/kafka
+      hostname: kafka
+      container_name: kafka
+      ports:
+        - "9092:9092"
+      networks:
+        - elastic
+      environment:
+        KAFKA_ADVERTISED_HOST_NAME: kafka
+        KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
+      depends_on:
+        - zookeeper
 networks:
   elastic:
     name: elastic

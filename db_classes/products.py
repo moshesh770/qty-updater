@@ -1,6 +1,7 @@
 from db_classes.abs_index import IndObject, NotFoundError
 from db_classes.stores import Store
 from db_classes.db_client import es
+from models.kafka_util import send_data
 
 
 class Product(IndObject):
@@ -57,8 +58,13 @@ class Product(IndObject):
 
     @classmethod
     def update_inventory(cls, prod_id: str, new_qty: int):
-        if not cls.is_object_exists("products", prod_id):
+        st, old_prod = cls.load_by_id("products", prod_id)
+        if st != 200:
             return 404, f"No product with {prod_id} was found"
+        qty_diff = int(old_prod.qty) - new_qty
+        if qty_diff >= 2:
+            old_prod.qty = new_qty
+            send_data(prod=old_prod)
         try:
             res = cls.update_obj("products", obj_id=prod_id, query={"inventory": new_qty})
             return 200, res
