@@ -60,7 +60,7 @@ def remove_store(product_id: str):
     return res
 
 
-@app.get("/products/stores/{search_term}")
+@app.get("/products/stores/search/{search_term}")
 def get_products_store(search_term: str):
     st, res = ProductInd.fetch_store_by_product(search_term=search_term)
     if st != 200:
@@ -102,6 +102,7 @@ def create_product(product: Product, store_id: str):
     status, err = ProductInd.put_single('products', product)
     if status != 200:
         raise HTTPException(status, err)
+    return err
 
 
 @app.post("/stores/")

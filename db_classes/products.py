@@ -61,10 +61,14 @@ class Product(IndObject):
         st, old_prod = cls.load_by_id("products", prod_id)
         if st != 200:
             return 404, f"No product with {prod_id} was found"
-        qty_diff = int(old_prod.qty) - new_qty
+        old_qty = old_prod.body['_source']['inventory']
+        qty_diff = old_qty - new_qty
         if qty_diff >= 2:
-            old_prod.qty = new_qty
-            send_data(prod=old_prod)
+            old_prod.body['_source']['inventory'] = new_qty
+            try:
+                send_data(prod=old_prod)
+            except Exception as e:
+                return 500, str(e)
         try:
             res = cls.update_obj("products", obj_id=prod_id, query={"inventory": new_qty})
             return 200, res
