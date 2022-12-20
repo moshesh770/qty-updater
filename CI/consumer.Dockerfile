@@ -4,7 +4,7 @@ ENV APP_HOME /app
 WORKDIR $APP_HOME
 
 COPY ../consumer.py consumer.py
-
+RUN mkdir -p qty_updates
 COPY ../consumer-requirements.txt requirements.txt
 RUN pip install -r requirements.txt
 
