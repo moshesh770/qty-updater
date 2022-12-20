@@ -2,6 +2,10 @@ from db_classes.abs_index import IndObject, NotFoundError
 from db_classes.stores import Store
 from db_classes.db_client import es
 from models.kafka_util import send_data
+from multiprocessing.dummy import Pool
+
+THREADS_NUMBER = 32
+pool = Pool(THREADS_NUMBER)
 
 
 class Product(IndObject):
@@ -25,12 +29,8 @@ class Product(IndObject):
     def fetch_store_by_product(cls, search_term: str):
         query_body = {
             "query": {
-                "multi_match": {
-                    "fields": [
-                        "name",
-                        "description"
-                    ],
-                    "query": f"{search_term}"
+                "wildcard": {
+                    "name": f"*{search_term}*"
                 }
             }
         }
@@ -66,7 +66,7 @@ class Product(IndObject):
         if qty_diff >= 2:
             old_prod.body['_source']['inventory'] = new_qty
             try:
-                send_data(prod=old_prod)
+                pool.apply_async(send_data, [], {"prod": old_prod})
             except Exception as e:
                 return 500, str(e)
         try:

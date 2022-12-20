@@ -3,3 +3,4 @@ uvicorn
 retry
 elasticsearch[async]
 kafka-python
+expiringdict
