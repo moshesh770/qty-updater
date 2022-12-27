@@ -1,4 +1,6 @@
+import logging
 import uvicorn
+from utils.logging_config import setup_logging
 from pydantic import BaseModel
 from fastapi import FastAPI, HTTPException
 from db_classes.products import Product as ProductInd
@@ -6,6 +8,7 @@ from db_classes.stores import Store as StoreInd
 from typing import Union, Optional
 
 app = FastAPI()
+setup_logging()
 
 
 class Product(BaseModel):
@@ -60,12 +63,21 @@ def remove_store(product_id: str):
     return res
 
 
+@app.get("/stores/all/size/{size}")
+def get_all_stores(size: int):
+    st, res = StoreInd.get_all('stores', size)
+    if st != 200:
+        raise HTTPException(st, res)
+    return res
+
+
 @app.get("/products/stores/search/{search_term}")
 def get_products_store(search_term: str):
     st, res = ProductInd.fetch_store_by_product(search_term=search_term)
     if st != 200:
         raise HTTPException(st, res)
     else:
+        logging.debug('found %s stores', len(res))
         return res
 
 

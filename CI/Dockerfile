@@ -8,11 +8,12 @@ WORKDIR $APP_HOME
 RUN apk --update add build-base
 RUN apk --update add linux-headers
 
-COPY ../db_classes ./db_classes
-COPY ../models ./models
-COPY ../main.py main.py
+COPY ./db_classes ./db_classes
+COPY ./utils ./utils
+COPY ./models ./models
+COPY ./main.py main.py
 
-COPY ../requirements.txt requirements.txt
+COPY ./requirements.txt requirements.txt
 RUN pip install -r requirements.txt
 
 EXPOSE 8000

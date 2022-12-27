@@ -4,8 +4,9 @@ import logging
 from kafka import KafkaProducer
 import os
 
+DEBUG = os.environ.get('local_debug', None)
 
-if os.name == 'nt':
+if DEBUG is not None:
     KAFKA_HOST = "localhost"
 else:
     KAFKA_HOST = "kafka"

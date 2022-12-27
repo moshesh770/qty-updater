@@ -48,5 +48,13 @@ class IndObject:
     @classmethod
     @retry(tries=3)
     def update_obj(cls, index: str, obj_id: str, query: dict):
-        jobj = json.dumps(query)
         return es.update(index=index, id=obj_id, body={"doc": query})
+
+    @classmethod
+    @retry(tries=3)
+    def get_all(cls, index, size=100):
+        try:
+            results = es.search(index=index, body={'size': size, 'query': {'match_all': {}}})
+            return 200, results['hits']['hits']
+        except NotFoundError as e:
+            return 404, str(e)

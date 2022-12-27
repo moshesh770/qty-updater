@@ -11,10 +11,12 @@ class Store(IndObject):
     @classmethod
     def load_by_id(cls, index: str, obj_id: str):
         if stores_cache.get(obj_id):
-            return stores_cache.get(obj_id)
-        store = super().load_by_id(index, obj_id)
-        stores_cache[obj_id] = store
-        return store
+            logging.debug('store_id: %s | found in cache', obj_id)
+            return 200, stores_cache.get(obj_id)
+        st, store = super().load_by_id(index, obj_id)
+        if st == 200:
+            stores_cache[obj_id] = store
+        return st, store
 
     @classmethod
     def put_single(cls, index: str, obj):
